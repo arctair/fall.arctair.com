@@ -56,8 +56,5 @@ function updateMap(data) {
     features: features
   }
 
-  L.geoJSON({
-    type: "Feature",
-    geometry: intersect
-  }).addTo(colormap);
+  L.geoJSON(fc).addTo(colormap);
 }
