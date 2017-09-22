@@ -33,23 +33,31 @@ function updateMap(data) {
     id: 'mapbox.satellite',
     accessToken: 'pk.eyJ1IjoiYXJjdGFpciIsImEiOiJjajZ0azlxc28wZnp5MndvNGZkOG9waXVmIn0.QkUWyUDc1TjXFn6K0DB1rg'
   }).addTo(colormap);
-
   L.geoJSON(mn_bounds).addTo(colormap);
 
+  var voronoi = d3.voronoi();
+  voronoi.x(dnrobj => parseFloat(dnrobj.lon));
+  voronoi.y(dnrobj => parseFloat(dnrobj.lat));
+  voronoi.extent([[-180, -90], [180, 90]])
+  var polygons = voronoi.polygons(dnr_color);
+
+  var features = polygons.map(polygon => {
+    return {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [polygon]
+      }
+    }
+  });
+
+  var fc = {
+    type: "FeatureCollection",
+    features: features
+  }
+
   L.geoJSON({
-    "type": "FeatureCollection",
-    "features": dnr_color
-      .map(dnrobj => {
-        return {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [parseFloat(dnrobj.lon), parseFloat(dnrobj.lat)]
-          },
-          "properties": {
-            "name": dnrobj.name,
-          }
-        }
-      })
-  }).addTo(colormap)
+    type: "Feature",
+    geometry: intersect
+  }).addTo(colormap);
 }

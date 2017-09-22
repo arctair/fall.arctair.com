@@ -6,7 +6,9 @@ const app = express();
 app.use('/leaflet', express.static(path.join(__dirname, '/node_modules/leaflet/dist')));
 app.use('/jquery', express.static(path.join(__dirname, '/node_modules/jquery/dist')));
 app.use('/bootstrap', express.static(path.join(__dirname, '/node_modules/bootstrap/dist')));
+app.use('/turf', express.static(path.join(__dirname, '/node_modules/@turf/turf')));
 app.use('/public', express.static(path.join(__dirname, '/public')));
+
 
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/colormap.html')));
