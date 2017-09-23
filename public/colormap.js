@@ -24,6 +24,53 @@ function getMNGeoJSON() {
 }
 
 function buildDNRPopup(feature) {
+  var prop = feature.properties;
+  feature.properties.popupContent =
+    `<h4 class="mb-0">${prop.name}</h4>` +
+    `<div id="accordion-${prop.name}" role="tablist" aria-multiselectable="true">` +
+      '<div class="card">' +
+        `<div class="card-header" role="tab" id="headingOne-${prop.name}">` +
+          '<h5 class="mb-0">' +
+            `<a data-toggle="collapse" data-parent="#accordion-${prop.name}" href="#collapseOne-${prop.name}" aria-expanded="true" aria-controls="collapseOne-${prop.name}">` +
+              'Where To Go' +
+            '</a>' +
+          '</h5>' +
+        '</div>' +
+        `<div id="collapseOne-${prop.name}" class="collapse show" role="tabpanel" aria-labelledby="headingOne-${prop.name}">` +
+          '<div class="card-block">' +
+            prop.whereToGo +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        `<div class="card-header" role="tab" id="headingTwo-${prop.name}">` +
+          '<h5 class="mb-0">' +
+            `<a data-toggle="collapse" data-parent="#accordion-${prop.name}" href="#collapseTwo-${prop.name}" aria-expanded="true" aria-controls="collapseTwo-${prop.name}">` +
+              'What To See' +
+            '</a>' +
+          '</h5>' +
+        '</div>' +
+        `<div id="collapseTwo-${prop.name}" class="collapse hide" role="tabpanel" aria-labelledby="headingTwo-${prop.name}">` +
+          '<div class="card-block">' +
+            prop.whatToSee +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        `<div class="card-header" role="tab" id="headingThree-${prop.name}">` +
+          '<h5 class="mb-0">' +
+            `<a data-toggle="collapse" data-parent="#accordion-${prop.name}" href="#collapseThree-${prop.name}" aria-expanded="true" aria-controls="collapseThree-${prop.name}">` +
+              'Also of Interest' +
+            '</a>' +
+          '</h5>' +
+        '</div>' +
+        `<div id="collapseThree-${prop.name}" class="collapse hide" role="tabpanel" aria-labelledby="headingThree-${prop.name}">` +
+          '<div class="card-block">' +
+            prop.alsoOfInterest +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
 }
 
 function stageToColor(stage) {
