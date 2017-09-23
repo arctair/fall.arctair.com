@@ -147,10 +147,33 @@ function buildDNRFeatureCollection(mn_feature, dnr_json, colormap) {
   });
 }
 
+function addLegend(colormap) {
+  var legend = L.control({position: 'bottomright'});
+
+  legend.onAdd = function(map) {
+    var div = L.DomUtil.create('div', 'info legend');
+    var stageToLabels = [
+      [1, '0-10%'],
+      [2, '10-25%'],
+      [3, '25-50%'],
+      [4, '50-75%'],
+      [5, '75-100%'],
+      [6, 'past peak']
+    ]
+
+    stageToLabels.forEach(assoc => div.innerHTML +=
+      `<i style="background:${stageToColor(assoc[0])}"></i>${assoc[1]}<br>`);
+
+    return div;
+  }
+  return legend.addTo(colormap);
+}
+
 function initMap() {
   return new Promise((fulfill, reject) => {
     let colormap = L.map('colormap');
 
+    addLegend(colormap);
     colormap.fitBounds(L.latLngBounds(
           L.latLng(43.5, -97.5), L.latLng(49.25, -89.5)));
 
