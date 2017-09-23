@@ -11,14 +11,14 @@ $(document).ready(function() {
 
 function getDNRData() {
   return $.ajax({
-    url: "/json",
+    url: "json",
     dataType: "json"
   });
 }
 
 function getMNGeoJSON() {
   return $.ajax({
-    url: "/public/mn_bounds.gjson",
+    url: "public/mn_bounds.gjson",
     dataType: "json"
   })
 }
