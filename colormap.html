@@ -3,18 +3,16 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <script src="./jquery/jquery.min.js"></script>
-  <script src="./bootstrap/js/bootstrap.min.js"></script>
-  <script src="https://d3js.org/d3-voronoi.v1.min.js"></script>
-  <script src="./leaflet/leaflet.js"></script>
-  <script src="./turf/turf.min.js"></script>
-  <script src="./public/colormap.js"></script>
-  <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-  <link href="./bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
-  <link href="./leaflet/leaflet.css" rel="stylesheet" type="text/css">
-  <link href="./public/colormap.css" rel="stylesheet" type="text/css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js"
+    integrity="sha256-kdEnCVOWosn3TNsGslxB8ffuKdrZoGQdIdPwh7W1CsE="
+    crossorigin="anonymous"></script>
+  <script src="./colormap.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css"
+    integrity="sha256-LcmP8hlMTofQrGU6W2q3tUnDnDZ1QVraxfMkP060ekM="
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="./colormap.css" />
 </head>
-<body>
+<body onload="ready()">
   <div id="colormap"></div>
 </body>
 </html>
