@@ -1,3 +1,5 @@
+let bucket_url = "https://s3.us-east-2.amazonaws.com/fall.arctair.com"
+
 function ready() {
   let colormap = L.map('colormap');
 
@@ -56,7 +58,7 @@ function getDNRGeoJSON() {
         fulfill(JSON.parse(this.responseText));
       }
     };
-    req.open("GET", "https://s3.us-east-2.amazonaws.com/fall.arctair.com/latest.json");
+    req.open("GET", `${bucket_url}/latest.json`);
     req.send();
   });
 }
@@ -69,7 +71,7 @@ function getMNGeoJSON() {
         fulfill(JSON.parse(this.responseText));
       }
     };
-    req.open("GET", "https://s3.us-east-2.amazonaws.com/fall.arctair.com/mn_feature.json");
+    req.open("GET", `${bucket_url}/mn_feature.json`);
     req.send();
   });
 }
