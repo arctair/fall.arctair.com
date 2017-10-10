@@ -5,7 +5,10 @@ let bucket_url = "https://s3.us-east-2.amazonaws.com/fall.arctair.com"
 function loadLayers(colormap) {
   return Promise.all([
     getDNRGeoJSON().then(
-      geojson => Promise.resolve(L.geoJSON(geojson, { style: dnrStyle }).addTo(colormap)),
+      geojson => new Promise(resolve => {
+        if (geojson.properties) addLastUpdated(colormap, geojson.properties.updated);
+        return resolve(L.geoJSON(geojson, { style: dnrStyle, onEachFeature: popupBinder }).addTo(colormap));
+      }),
       err => Promise.reject(err)),
     getMNCountiesGeoJSON().then(
       geojson => Promise.resolve(L.geoJSON(geojson, { style: mnCountyStyle }).addTo(colormap)),
@@ -28,9 +31,8 @@ function ready() {
       mnGeojson.bringToFront();
       mnLakesGeojson.bringToFront();
       mnCountiesGeojson.bringToFront();
+      addLegend(colormap);
     })
-
-  addLegend(colormap);
 
   colormap.fitBounds(L.latLngBounds(
         L.latLng(43.5, -97.5), L.latLng(49.25, -89.5)));
@@ -157,4 +159,16 @@ function addLegend(colormap) {
     return div;
   }
   return legend.addTo(colormap);
+}
+
+function addLastUpdated(colormap, unix_ms) {
+  var timestamp = L.control({position: 'bottomright'});
+
+  timestamp.onAdd = function(map) {
+    var div = L.DomUtil.create('div', 'info');
+    div.innerHTML = `<span style="color:#FFF;">last updated ${new Date(unix_ms)}</span>`;
+
+    return div;
+  }
+  return timestamp.addTo(colormap);
 }

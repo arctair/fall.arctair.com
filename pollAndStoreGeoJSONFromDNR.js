@@ -52,7 +52,7 @@ function dnrToGeoJSON(dnr) {
       feature.geometry = turf.intersect(feature, mn_feature).geometry;
     });
 
-    dnr.geojson = { type: "FeatureCollection", features: features };
+    dnr.geojson = { type: "FeatureCollection", features: features, properties: { updated: (new Date()).getTime() } };
     fulfill(dnr);
   });
 }
