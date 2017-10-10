@@ -1,22 +1,34 @@
 let bucket_url = "https://s3.us-east-2.amazonaws.com/fall.arctair.com"
 
+
+
+function loadLayers(colormap) {
+  return Promise.all([
+    getDNRGeoJSON().then(
+      geojson => Promise.resolve(L.geoJSON(geojson, { style: dnrStyle }).addTo(colormap)),
+      err => Promise.reject(err)),
+    getMNCountiesGeoJSON().then(
+      geojson => Promise.resolve(L.geoJSON(geojson, { style: mnCountyStyle }).addTo(colormap)),
+      err => Promise.reject(err)),
+    getMNLakesGeoJSON().then(
+      geojson => Promise.resolve(L.geoJSON(geojson, { style: mnLakesStyle }).addTo(colormap)),
+      err => Promise.reject(err)),
+    getMNGeoJSON().then(
+      geojson => Promise.resolve(L.geoJSON(geojson, { style: mnStateStyle }).addTo(colormap)),
+      err => Promise.reject(err)),
+  ])
+}
+
 function ready() {
   let colormap = L.map('colormap');
 
-  let getStyle = feature => ({
-    fillColor: getColor(feature.properties.leaves),
-    fillOpacity: 1,
-    weight: 0.5,
-    color: "#926239"
-  })
-
-  getDNRGeoJSON().then(
-    geojson => L.geoJSON(geojson, { style: getStyle }).addTo(colormap),
-    error => alert(error));
-
-  getMNGeoJSON().then(
-    geojson => L.geoJSON(geojson).addTo(colormap),
-    error => alert(error));
+  loadLayers(colormap)
+    .then(([dnrGeojson, mnCountiesGeojson, mnLakesGeojson, mnGeojson]) => {
+      dnrGeojson.bringToFront();
+      mnGeojson.bringToFront();
+      mnLakesGeojson.bringToFront();
+      mnCountiesGeojson.bringToFront();
+    })
 
   addLegend(colormap);
 
@@ -50,6 +62,12 @@ function getColor(v) {
   }
 }
 
+let dnrStyle = feature => ({
+  fillColor: getColor(feature.properties.leaves),
+  fillOpacity: 1,
+  weight: 0.5,
+  color: "#926239"
+})
 function getDNRGeoJSON() {
   return new Promise((fulfill, reject) => {
     let req = new XMLHttpRequest();
@@ -63,6 +81,30 @@ function getDNRGeoJSON() {
   });
 }
 
+
+let mnCountyStyle = {
+  fillOpacity: 0,
+  weight: 0.25,
+  color: "#AAAAAA",
+}
+function getMNCountiesGeoJSON() {
+  return new Promise((fulfill, reject) => {
+    let req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        fulfill(JSON.parse(this.responseText));
+      }
+    };
+    req.open("GET", `${bucket_url}/mn_counties.json`);
+    req.send();
+  });
+}
+
+let mnStateStyle = {
+  fillOpacity: 0,
+  weight: 4,
+  color: "#4444CC",
+}
 function getMNGeoJSON() {
   return new Promise((fulfill, reject) => {
     let req = new XMLHttpRequest();
@@ -72,6 +114,25 @@ function getMNGeoJSON() {
       }
     };
     req.open("GET", `${bucket_url}/mn_feature.json`);
+    req.send();
+  });
+}
+
+let mnLakesStyle = {
+  fillColor: "#66ccff",
+  fillOpacity: 1,
+  weight: 0,
+  color: "#4444DD",
+}
+function getMNLakesGeoJSON() {
+  return new Promise((fulfill, reject) => {
+    let req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        fulfill(JSON.parse(this.responseText));
+      }
+    };
+    req.open("GET", `${bucket_url}/mn_lakes.json`);
     req.send();
   });
 }
