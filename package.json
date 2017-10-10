@@ -1,20 +1,15 @@
 {
   "name": "mn-colormap",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Minnesota Fall Color Map",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
-  },
+  "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@turf/turf": "^4.7.3",
-    "bootstrap": "^3.3.7",
-    "express": "^4.15.4",
-    "jquery": "^3.2.1",
     "leaflet": "^1.2.0",
-    "request": "^2.81.0"
+    "md5": "^2.2.1",
+    "request": "^2.81.0",
+    "voronoi": "^1.0.0"
   }
 }

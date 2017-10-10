@@ -1,0 +1,7 @@
+{
+  "region": "us-east-2",
+  "accessKeyId": "",
+  "secretAccessKey": "",
+  "bucket": "",
+  "uploadAcl": "public-read"
+}
