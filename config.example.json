@@ -3,5 +3,13 @@
   "accessKeyId": "",
   "secretAccessKey": "",
   "bucket": "",
-  "uploadAcl": "public-read"
+  "acl": "public-read",
+  "metaData": {
+    "CacheControl": "max-age=300"
+  },
+  "fileNames": {
+    "latestJson": "latest.json",
+    "latestMd5": "latest.md5"
+  },
+  "ddbTable": "fall-history-layers"
 }

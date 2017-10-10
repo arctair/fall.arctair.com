@@ -9,6 +9,7 @@ let aws = require('aws-sdk');
 aws.config.update(config);
 
 let s3 = new aws.S3();
+let docClient = new aws.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
 
 function getDnr() {
   return new Promise((fulfill, reject) => {
@@ -77,18 +78,37 @@ function compareMd5(dnr, hash) {
 
 function commitMd5(hash) {
   return new Promise((fulfill, reject) =>
-    s3.putObject({ Body: hash, Bucket: config.bucket, Key: 'latest.md5', ACL: config.uploadAcl }, function(err) {
+    s3.putObject({ Body: hash, Bucket: config.bucket, Key: config.fileNames.latestMd5 }, function(err) {
       if (err) reject(err);
       else fulfill();
     }));
 }
 
 function commitJson(geojson) {
-  return new Promise((fulfill, reject) =>
-    s3.putObject({ Body: JSON.stringify(geojson), Bucket: config.bucket, Key: 'latest.json', ACL: config.uploadAcl }, function(err) {
-      if (err) reject(err);
-      else fulfill('Updated');
-    }));
+  return Promise.all([
+    new Promise((resolve, reject) =>
+      s3.putObject({
+          Body: JSON.stringify(geojson),
+          Bucket: config.bucket,
+          Key: config.fileNames.latestJson,
+          ACL: config.acl,
+          Metadata: config.metaData },
+      (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      })),
+    new Promise((resolve, reject) => {
+      // todo change JSON.stringify(geojson) to geojson if AWS fixes acceptance of empty strings
+      // aws/aws-sdk-js#833
+      docClient.put({
+          TableName: config.ddbTable,
+          Item: { timestamp: geojson.properties.updated, geojson: JSON.stringify(geojson)} },
+      (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    })
+  ]);
 }
 
 exports.handler = (event, context, callback) => {
@@ -96,8 +116,11 @@ exports.handler = (event, context, callback) => {
     .then(([dnr, hash]) => compareMd5(dnr, hash))
     .then(dnr => Promise.all([dnrToGeoJSON(dnr), commitMd5(dnr.md5)]))
     .then(([dnr, _]) => commitJson(dnr.geojson))
-    .then(success => callback(null, success), err => {
-      if (err && err.msg == "No update") callback(null, err.msg);
-      else callback(err);
-    });
+    .then(
+      ([success_s3, success_ddb]) => callback(null, { s3:success_s3, ddb: success_ddb }),
+      err => {
+        if (err && err.msg == "No update") callback(null, err.msg);
+        else callback(err);
+      }
+    );
 };
