@@ -1,7 +1,5 @@
 ## UI
 * Support popups for polygons
-* Lock boundaries
-* Lock zoom range
 
 ## Data
 * Support playback

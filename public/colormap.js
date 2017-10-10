@@ -23,7 +23,16 @@ function loadLayers(colormap) {
 }
 
 function ready() {
-  let colormap = L.map('colormap');
+  let bounds = L.latLngBounds(
+        L.latLng(43.25, -97.5), L.latLng(49.5, -89.25));
+
+  let colormap = L.map('colormap', {
+    maxBounds: bounds,
+    zoomControl: true,
+    zoomSnap: 0.25,
+    minZoom: 6.5,
+    zoom: 6.5,
+    center: bounds.getCenter() });
 
   loadLayers(colormap)
     .then(([dnrGeojson, mnCountiesGeojson, mnLakesGeojson, mnGeojson]) => {
@@ -33,9 +42,6 @@ function ready() {
       mnCountiesGeojson.bringToFront();
       addLegend(colormap);
     })
-
-  colormap.fitBounds(L.latLngBounds(
-        L.latLng(43.5, -97.5), L.latLng(49.25, -89.5)));
 
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
