@@ -7,7 +7,7 @@ function loadLayers(colormap) {
     getDNRGeoJSON().then(
       geojson => new Promise(resolve => {
         if (geojson.properties) addLastUpdated(colormap, geojson.properties.updated);
-        return resolve(L.geoJSON(geojson, { style: dnrStyle, onEachFeature: popupBinder }).addTo(colormap));
+        return resolve(L.geoJSON(geojson, { style: dnrStyle }).addTo(colormap));
       }),
       err => Promise.reject(err)),
     getMNCountiesGeoJSON().then(
