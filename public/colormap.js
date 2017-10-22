@@ -77,16 +77,8 @@ let dnrStyle = feature => ({
   color: "#926239"
 })
 function getDNRGeoJSON() {
-  return new Promise((fulfill, reject) => {
-    let req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        fulfill(JSON.parse(this.responseText));
-      }
-    };
-    req.open("GET", `${bucket_url}/latest.json`);
-    req.send();
-  });
+  return fetch(`${bucket_url}/latest.json`)
+    .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
 
@@ -96,16 +88,8 @@ let mnCountyStyle = {
   color: "#AAAAAA",
 }
 function getMNCountiesGeoJSON() {
-  return new Promise((fulfill, reject) => {
-    let req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        fulfill(JSON.parse(this.responseText));
-      }
-    };
-    req.open("GET", `${bucket_url}/mn_counties.json`);
-    req.send();
-  });
+  return fetch(`${bucket_url}/mn_counties.json`)
+    .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
 let mnStateStyle = {
@@ -114,16 +98,8 @@ let mnStateStyle = {
   color: "#4444CC",
 }
 function getMNGeoJSON() {
-  return new Promise((fulfill, reject) => {
-    let req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        fulfill(JSON.parse(this.responseText));
-      }
-    };
-    req.open("GET", `${bucket_url}/mn_feature.json`);
-    req.send();
-  });
+  return fetch(`${bucket_url}/mn_feature.json`)
+    .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
 let mnLakesStyle = {
@@ -133,16 +109,8 @@ let mnLakesStyle = {
   color: "#4444DD",
 }
 function getMNLakesGeoJSON() {
-  return new Promise((fulfill, reject) => {
-    let req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        fulfill(JSON.parse(this.responseText));
-      }
-    };
-    req.open("GET", `${bucket_url}/mn_lakes.json`);
-    req.send();
-  });
+  return fetch(`${bucket_url}/mn_lakes.json`)
+    .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
 function addLegend(colormap) {
