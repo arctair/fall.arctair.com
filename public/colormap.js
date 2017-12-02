@@ -1,7 +1,3 @@
-let bucket_url = "https://s3.us-east-2.amazonaws.com/fall.arctair.com"
-
-
-
 function loadLayers(colormap) {
   return Promise.all([
     getDNRGeoJSON().then(
@@ -77,7 +73,7 @@ let dnrStyle = feature => ({
   color: "#926239"
 })
 function getDNRGeoJSON() {
-  return fetch(`${bucket_url}/latest.json`)
+  return fetch('./latest.json')
     .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
@@ -88,7 +84,7 @@ let mnCountyStyle = {
   color: "#AAAAAA",
 }
 function getMNCountiesGeoJSON() {
-  return fetch(`${bucket_url}/mn_counties.json`)
+  return fetch('./mn_counties.json')
     .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
@@ -98,7 +94,7 @@ let mnStateStyle = {
   color: "#4444CC",
 }
 function getMNGeoJSON() {
-  return fetch(`${bucket_url}/mn_feature.json`)
+  return fetch('./mn_feature.json')
     .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
@@ -109,7 +105,7 @@ let mnLakesStyle = {
   color: "#4444DD",
 }
 function getMNLakesGeoJSON() {
-  return fetch(`${bucket_url}/mn_lakes.json`)
+  return fetch('./mn_lakes.json')
     .then(res => res.ok ? res.json() : Promise.reject(res))
 }
 
