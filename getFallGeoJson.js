@@ -1,6 +1,6 @@
 const request = require('request-promise');
 
-const pipeline = () => request('http://maps2.dnr.state.mn.us/cgi-bin/fall_colors_json.cgi')
+const pipeline = () => request(process.env.DNR_CGI_URL)
 .then(deduplicateCommas)
 .then(extractJsonList)
 .then(JSON.parse)
