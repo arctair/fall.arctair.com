@@ -1,8 +1,26 @@
-const chunks = [];
-process.stdin.on('data', chunk => chunks.push(chunk));
-process.stdin.on('end', () => process.stdout.write(
-  JSON.stringify(createDnrFallGeoJson(JSON.parse(chunks.join())))
-));
+const request = require('request-promise');
+
+const pipeline = () => request('http://maps2.dnr.state.mn.us/cgi-bin/fall_colors_json.cgi')
+.then(deduplicateCommas)
+.then(extractJsonList)
+.then(JSON.parse)
+.then(createDnrFallGeoJson)
+.then(featureCollection => ({
+  ...featureCollection,
+  features: featureCollection.features.sort((
+    { properties: { id: idFirst } },
+    { properties: { id: idLast } },
+  ) => idFirst.localeCompare(idLast)),
+}))
+.then(JSON.stringify)
+.then(s => process.stdout.write(s))
+
+const deduplicateCommas = s => s.replace(/,+/g, ',');
+
+const extractJsonList = s => s.substring(
+  s.indexOf('['),
+  s.lastIndexOf(']') + 1,
+);
 
 const createDnrFallGeoJson = json => {
   return createFeatureCollection(
@@ -37,3 +55,5 @@ const parseProperties = ({ flowers, grasses, leaves, ...properties }) => ({
   leaves: parseInt(leaves, 10),
   ...properties,
 });
+
+pipeline();
