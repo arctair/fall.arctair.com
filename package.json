@@ -2,7 +2,11 @@
   "dependencies": {
     "express": "^4.17.1",
     "knex": "^0.19.4",
+    "nodemon": "^1.19.2",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
+  },
+  "scripts": {
+    "start": "yarn exec nodemon server.js"
   }
 }

@@ -1,19 +1,24 @@
-const request = require('request-promise');
+const express = require('express');
+const rq = require('request-promise');
 
-const pipeline = () => request(process.env.DNR_CGI_URL)
-.then(deduplicateCommas)
-.then(extractJsonList)
-.then(JSON.parse)
-.then(createDnrFallGeoJson)
-.then(featureCollection => ({
-  ...featureCollection,
-  features: featureCollection.features.sort((
-    { properties: { id: idFirst } },
-    { properties: { id: idLast } },
-  ) => idFirst.localeCompare(idLast)),
-}))
-.then(JSON.stringify)
-.then(s => process.stdout.write(s))
+const app = express();
+
+app.post('/methods/update', (request, response) => {
+  rq(process.env.DNR_CGI_URL)
+  .then(deduplicateCommas)
+  .then(extractJsonList)
+  .then(JSON.parse)
+  .then(createDnrFallGeoJson)
+  .then(featureCollection => ({
+    ...featureCollection,
+    features: featureCollection.features.sort((
+      { properties: { id: idFirst } },
+      { properties: { id: idLast } },
+    ) => idFirst.localeCompare(idLast)),
+  }))
+  .then(JSON.stringify)
+  .then(s => response.send(s));
+});
 
 const deduplicateCommas = s => s.replace(/,+/g, ',');
 
@@ -56,4 +61,5 @@ const parseProperties = ({ flowers, grasses, leaves, ...properties }) => ({
   ...properties,
 });
 
-pipeline();
+
+app.listen(process.env.PORT || 8080, () => console.log(`*:${process.env.PORT || 8080}`));
