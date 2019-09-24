@@ -1,11 +1,15 @@
+const exec = require('child_process').exec;
 const express = require('express');
 require('express-zip');
-const rq = require('request-promise');
-const mktemp = require('mktemp');
 const fs = require('fs').promises;
-const exec = require('child_process').exec;
+const mktemp = require('mktemp');
+const rq = require('request-promise');
+const sqlite = require('sqlite3');
 
 const app = express();
+const db = new sqlite.Database('fall.sqlite');
+
+db.run('CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, geojson STRING)');
 
 app.get('/geojson', async (_, response) => response.json(await getGeoJson()));
 
@@ -21,6 +25,21 @@ app.get('/tifs', async (_, response) => {
     response.status(500);
     response.send(error);
   }
+});
+
+app.post('/saveGeojson', async (_, response) => {
+  const geojson = JSON.stringify(await getGeoJson());
+  const id = await new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO snapshots (geojson) VALUES (?)',
+      geojson,
+      function(error) {
+        if (error) reject(error);
+        else resolve(this.lastID)
+      },
+    );
+  });
+  response.json({ id });
 });
 
 const getGeoJson = () => rq(process.env.DNR_CGI_URL)
