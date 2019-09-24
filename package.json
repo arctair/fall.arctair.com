@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "aws-sdk": "^2.534.0",
     "deep-equal": "^1.1.0",
     "express": "^4.17.1",
     "express-zip": "^2.0.1",

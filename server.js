@@ -2,9 +2,11 @@ const equal = require('deep-equal');
 const exec = require('child_process').exec;
 const express = require('express');
 require('express-zip');
-const fs = require('fs').promises;
+const fsSync = require('fs');
+const fs = fsSync.promises;
 const mktemp = require('mktemp');
 const rq = require('request-promise');
+const s3 = new (require('aws-sdk').S3)();
 const sqlite = require('sqlite3');
 
 const app = express();
@@ -39,6 +41,7 @@ app.post('/update', async (_, response) => {
         saveGeoJson(upstreamGeoJson),
         generateTifs(JSON.stringify(await getUpstreamGeoJson())),
       ]);
+      await Promise.all(files.map(uploadTif));
       await Promise.all(files.map(({ path }) => fs.unlink(path)));
       response.json({ didUpdate: true, id });
     }
@@ -148,6 +151,20 @@ const saveGeoJson = geojson => new Promise(
     function(error) {
       if (error) reject(error);
       else resolve(this.lastID)
+    },
+  )
+);
+
+const uploadTif = ({ path, field }) => new Promise(
+  (resolve, reject) => s3.upload(
+    {
+      Bucket: process.env.S3_ARTIFACT_BUCKET,
+      Body: fsSync.createReadStream(path),
+      Key: `${field}.tif`,
+    },
+    (error, data) => {
+      if (error) reject(error);
+      else resolve(data);
     },
   )
 );
