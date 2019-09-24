@@ -27,6 +27,19 @@ app.get('/tifs', async (_, response) => {
   }
 });
 
+app.get('/latestGeojson', async (_, response) => {
+  const geojson = await new Promise((resolve, reject) => {
+    db.get(
+      'SELECT geojson FROM snapshots WHERE timestamp = (SELECT MAX(timestamp) FROM snapshots)',
+      (error, record) => {
+        if (error) reject(error);
+        else resolve(record.geojson);
+      },
+    );
+  });
+  response.json(JSON.parse(geojson));
+});
+
 app.post('/saveGeojson', async (_, response) => {
   const geojson = JSON.stringify(await getGeoJson());
   const id = await new Promise((resolve, reject) => {
