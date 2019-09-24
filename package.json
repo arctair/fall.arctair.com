@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "deep-equal": "^1.1.0",
     "express": "^4.17.1",
     "express-zip": "^2.0.1",
     "knex": "^0.19.4",

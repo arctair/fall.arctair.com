@@ -1,3 +1,4 @@
+const equal = require('deep-equal');
 const exec = require('child_process').exec;
 const express = require('express');
 require('express-zip');
@@ -11,11 +12,13 @@ const db = new sqlite.Database('fall.sqlite');
 
 db.run('CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, geojson STRING)');
 
-app.get('/geojson', async (_, response) => response.json(await getGeoJson()));
+app.get('/upstreamGeoJson', async (_, response) => response.json(await getUpstreamGeoJson()));
+
+app.get('/latestGeoJson', async (_, response) => response.json(await getLatestGeoJson()));
 
 app.get('/tifs', async (_, response) => {
   try {
-    const files = (await generateTifs(JSON.stringify(await getGeoJson())))
+    const files = (await generateTifs(JSON.stringify(await getUpstreamGeoJson())))
     .map(({ field, path }) => ({ name: `${field}.tif`, path }));
     await new Promise(resolve => response.zip(files, resolve));
     await Promise.all(files.map(({ path }) => fs.unlink(path)));
@@ -27,35 +30,30 @@ app.get('/tifs', async (_, response) => {
   }
 });
 
-app.get('/latestGeojson', async (_, response) => {
-  const geojson = await new Promise((resolve, reject) => {
-    db.get(
-      'SELECT geojson FROM snapshots WHERE timestamp = (SELECT MAX(timestamp) FROM snapshots)',
-      (error, record) => {
-        if (error) reject(error);
-        else resolve(record.geojson);
-      },
-    );
-  });
-  response.json(JSON.parse(geojson));
+app.post('/update', async (_, response) => {
+  try {
+    const [upstreamGeoJson, latestGeoJson] = await Promise.all([getUpstreamGeoJson(), getLatestGeoJson()]);
+    const shouldUpdate = !equal(upstreamGeoJson, latestGeoJson);
+    if (shouldUpdate) {
+      const [id, files] = await Promise.all([
+        saveGeoJson(upstreamGeoJson),
+        generateTifs(JSON.stringify(await getUpstreamGeoJson())),
+      ]);
+      await Promise.all(files.map(({ path }) => fs.unlink(path)));
+      response.json({ didUpdate: true, id });
+    }
+    else {
+      response.json({ didUpdate: false });
+    }
+  }
+  catch (error) {
+    console.error(error);
+    response.status(500);
+    response.send(error);
+  }
 });
 
-app.post('/saveGeojson', async (_, response) => {
-  const geojson = JSON.stringify(await getGeoJson());
-  const id = await new Promise((resolve, reject) => {
-    db.run(
-      'INSERT INTO snapshots (geojson) VALUES (?)',
-      geojson,
-      function(error) {
-        if (error) reject(error);
-        else resolve(this.lastID)
-      },
-    );
-  });
-  response.json({ id });
-});
-
-const getGeoJson = () => rq(process.env.DNR_CGI_URL)
+const getUpstreamGeoJson = () => rq(process.env.DNR_CGI_URL)
 .then(deduplicateCommas)
 .then(extractJsonList)
 .then(JSON.parse)
@@ -132,5 +130,26 @@ const generateTifs = async geojson => {
   await fs.unlink(geojsonPath);
   return fieldPaths;
 };
+
+const getLatestGeoJson = () => new Promise(
+  (resolve, reject) => db.get(
+    'SELECT geojson FROM snapshots WHERE timestamp = (SELECT MAX(timestamp) FROM snapshots)',
+    (error, record) => {
+      if (error) reject(error);
+      else resolve(JSON.parse(record.geojson));
+    },
+  )
+);
+
+const saveGeoJson = geojson => new Promise(
+  (resolve, reject) => db.run(
+    'INSERT INTO snapshots (geojson) VALUES (?)',
+    JSON.stringify(geojson),
+    function(error) {
+      if (error) reject(error);
+      else resolve(this.lastID)
+    },
+  )
+);
 
 app.listen(process.env.PORT || 8080, () => console.log(`*:${process.env.PORT || 8080}`));
