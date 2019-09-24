@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "express": "^4.17.1",
+    "express-zip": "^2.0.1",
     "knex": "^0.19.4",
     "mktemp": "^1.0.0",
     "nodemon": "^1.19.2",
